@@ -3,6 +3,8 @@
 Тестовое задание arqa: PostgreSQL-витрины, семантическая модель в YAML и дашборд на Vega-Lite
 по синтетическому портфелю на 01.09.2026 и 01.10.2026.
 
+**Демо дашборда:** https://leylagxx.github.io/arqa-risk-summary/
+
 ![Дашборд](docs/dashboard.png)
 
 ## Как запустить
