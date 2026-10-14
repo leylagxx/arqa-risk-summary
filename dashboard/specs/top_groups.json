@@ -1,0 +1,101 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v6.json",
+  "description": "Топ-10 групп связанных заёмщиков на последний срез, доля портфеля",
+  "data": {
+    "url": "data/top_groups.json"
+  },
+  "transform": [
+    {
+      "joinaggregate": [
+        {
+          "op": "max",
+          "field": "report_date",
+          "as": "last_date"
+        }
+      ]
+    },
+    {
+      "filter": "datum.report_date === datum.last_date"
+    },
+    {
+      "calculate": "datum.exposure_kzt / 1e9",
+      "as": "bn"
+    }
+  ],
+  "width": "container",
+  "height": 260,
+  "encoding": {
+    "y": {
+      "field": "group_id",
+      "type": "nominal",
+      "title": null,
+      "sort": {
+        "field": "rnk",
+        "op": "min"
+      }
+    },
+    "x": {
+      "field": "share",
+      "type": "quantitative",
+      "title": "Доля портфеля",
+      "axis": {
+        "format": ".0%",
+        "tickCount": 5,
+        "tickMinStep": 0.01
+      }
+    }
+  },
+  "layer": [
+    {
+      "mark": {
+        "type": "bar",
+        "cornerRadiusEnd": 4,
+        "height": {
+          "band": 0.62
+        },
+        "color": "#2a78d6"
+      },
+      "encoding": {
+        "tooltip": [
+          {
+            "field": "group_id",
+            "title": "Группа"
+          },
+          {
+            "field": "rnk",
+            "title": "Ранг"
+          },
+          {
+            "field": "loans",
+            "title": "Кредитов"
+          },
+          {
+            "field": "bn",
+            "title": "млрд ₸",
+            "format": ",.2f"
+          },
+          {
+            "field": "share",
+            "title": "Доля",
+            "format": ".2%"
+          }
+        ]
+      }
+    },
+    {
+      "mark": {
+        "type": "text",
+        "align": "left",
+        "dx": 5,
+        "fontSize": 11,
+        "color": "#52514e"
+      },
+      "encoding": {
+        "text": {
+          "field": "share",
+          "format": ".1%"
+        }
+      }
+    }
+  ]
+}

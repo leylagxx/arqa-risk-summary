@@ -1,0 +1,175 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v6.json",
+  "description": "Мост портфеля 01.09 → 01.10, млрд ₸. Ось не от нуля: итоговые столбцы обрезаны снизу, чтобы были видны изменения.",
+  "data": {
+    "url": "data/bridge.json"
+  },
+  "transform": [
+    {
+      "calculate": "({opening:'На начало', written_off:'Списаны', reinstated:'Возврат*', amortization:'Погашения', fx:'Курс USD', closing:'На конец', new:'Новые', repaid_out:'Выбыли'})[datum.step]",
+      "as": "short_label"
+    },
+    {
+      "filter": "datum.step === 'opening' || datum.step === 'closing' || abs(datum.amount_kzt) > 1e6"
+    },
+    {
+      "calculate": "datum.amount_kzt / 1e9",
+      "as": "amt_bn"
+    },
+    {
+      "calculate": "datum.step === 'closing' ? 0 : datum.amt_bn",
+      "as": "step_bn"
+    },
+    {
+      "window": [
+        {
+          "op": "sum",
+          "field": "step_bn",
+          "as": "cum_bn"
+        }
+      ],
+      "sort": [
+        {
+          "field": "sort_order"
+        }
+      ],
+      "frame": [
+        null,
+        0
+      ]
+    },
+    {
+      "calculate": "datum.step === 'closing' ? 0 : datum.cum_bn - datum.step_bn",
+      "as": "y0"
+    },
+    {
+      "calculate": "datum.step === 'closing' ? datum.amt_bn : datum.cum_bn",
+      "as": "y1"
+    },
+    {
+      "calculate": "datum.step === 'opening' || datum.step === 'closing' ? null : min(datum.y0, datum.y1)",
+      "as": "lo"
+    },
+    {
+      "joinaggregate": [
+        {
+          "op": "min",
+          "field": "lo",
+          "as": "min_lo"
+        }
+      ]
+    },
+    {
+      "calculate": "floor(datum.min_lo * 0.97 / 10) * 10",
+      "as": "base"
+    },
+    {
+      "calculate": "datum.step === 'opening' || datum.step === 'closing' ? datum.base : datum.y0",
+      "as": "y0"
+    },
+    {
+      "calculate": "datum.step === 'opening' || datum.step === 'closing' ? 'Итог' : (datum.amt_bn >= 0 ? 'Рост' : 'Снижение')",
+      "as": "kind"
+    },
+    {
+      "calculate": "datum.kind === 'Итог' ? format(datum.amt_bn, ',.1f') : format(datum.amt_bn, '+,.1f')",
+      "as": "value_label"
+    },
+    {
+      "calculate": "max(datum.y0, datum.y1)",
+      "as": "ytop"
+    }
+  ],
+  "width": "container",
+  "height": 260,
+  "encoding": {
+    "x": {
+      "field": "short_label",
+      "type": "nominal",
+      "title": null,
+      "sort": {
+        "field": "sort_order"
+      },
+      "axis": {
+        "labelAngle": 0,
+        "labelLimit": 140
+      }
+    }
+  },
+  "layer": [
+    {
+      "mark": {
+        "type": "bar",
+        "cornerRadius": 3,
+        "width": {
+          "band": 0.62
+        }
+      },
+      "encoding": {
+        "y": {
+          "field": "y0",
+          "type": "quantitative",
+          "title": "млрд ₸",
+          "scale": {
+            "zero": false
+          }
+        },
+        "y2": {
+          "field": "y1"
+        },
+        "color": {
+          "field": "kind",
+          "type": "nominal",
+          "title": null,
+          "scale": {
+            "domain": [
+              "Итог",
+              "Рост",
+              "Снижение"
+            ],
+            "range": [
+              "#2a78d6",
+              "#1baf7a",
+              "#e34948"
+            ]
+          },
+          "legend": {
+            "orient": "top",
+            "direction": "horizontal"
+          }
+        },
+        "tooltip": [
+          {
+            "field": "label",
+            "title": "Компонент"
+          },
+          {
+            "field": "amt_bn",
+            "title": "млрд ₸",
+            "format": ",.2f"
+          }
+        ]
+      }
+    },
+    {
+      "mark": {
+        "type": "text",
+        "dy": -8,
+        "fontSize": 11,
+        "color": "#0b0b0b"
+      },
+      "encoding": {
+        "y": {
+          "field": "ytop",
+          "type": "quantitative",
+          "scale": {
+            "zero": false
+          }
+        },
+        "text": {
+          "field": "value_label"
+        }
+      }
+    }
+  ]
+}

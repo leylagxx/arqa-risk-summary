@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Риск-сводка портфеля</title>
+<!-- Vega собран локально (vendor/), чтобы дашборд открывался без интернета.
+     Версии: vega 6.4.0, vega-lite 6.5.0, vega-embed 7.3.0 -->
+<script src="vendor/vega.min.js"></script>
+<script src="vendor/vega-lite.min.js"></script>
+<script src="vendor/vega-embed.min.js"></script>
+<style>
+  :root {
+    --surface-0: #f4f3f0;
+    --surface-1: #fcfcfb;
+    --border: #e4e3de;
+    --text-primary: #0b0b0b;
+    --text-secondary: #52514e;
+    --text-muted: #7a7974;
+    --accent: #2a78d6;
+    --warn-bg: #fff6e0;
+    --warn-border: #eda100;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--surface-0); color: var(--text-primary);
+    font: 14px/1.45 "Inter", -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 28px 16px 48px; }
+  header { display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 8px; margin-bottom: 18px; }
+  h1 { font-size: 22px; margin: 0; letter-spacing: -0.01em; }
+  .asof { color: var(--text-secondary); font-size: 14px; }
+  .kpis { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 12px; margin-bottom: 14px; }
+  .kpi { background: var(--surface-1); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; }
+  .kpi .label { color: var(--text-secondary); font-size: 12.5px; }
+  .kpi .value { font-size: 24px; font-weight: 650; letter-spacing: -0.02em; margin: 2px 0 2px; font-variant-numeric: tabular-nums; }
+  .kpi .value .unit { font-size: 14px; font-weight: 500; color: var(--text-secondary); }
+  .kpi .delta { color: var(--text-muted); font-size: 12.5px; font-variant-numeric: tabular-nums; }
+  .note {
+    background: var(--warn-bg); border: 1px solid var(--warn-border); border-left-width: 4px;
+    border-radius: 8px; padding: 10px 14px; margin-bottom: 14px; color: var(--text-primary);
+  }
+  .note b { font-weight: 650; }
+  .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+  .card { background: var(--surface-1); border: 1px solid var(--border); border-radius: 10px; padding: 16px 18px 10px; min-width: 0; }
+  .card.wide { grid-column: 1 / -1; }
+  .card h2 { font-size: 15px; margin: 0 0 2px; }
+  .card p.sub { margin: 0 0 8px; color: var(--text-secondary); font-size: 12.5px; }
+  .chart { width: 100%; overflow-x: auto; }
+  footer { margin-top: 18px; color: var(--text-muted); font-size: 12px; }
+  footer code { background: #ebeae6; padding: 1px 5px; border-radius: 4px; }
+  @media (max-width: 960px) { .kpis { grid-template-columns: repeat(3, minmax(0, 1fr)); } .grid { grid-template-columns: 1fr; } }
+  @media (max-width: 520px) { .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Риск-сводка кредитного портфеля</h1>
+    <div class="asof" id="asof">—</div>
+  </header>
+
+  <section class="kpis" id="kpis"></section>
+  <div class="note" id="dq" hidden></div>
+
+  <section class="grid">
+    <div class="card">
+      <h2>Динамика риск-показателей</h2>
+      <p class="sub">Доля портфеля, светлая точка — прошлый срез</p>
+      <div class="chart" id="v-dynamics"></div>
+    </div>
+    <div class="card">
+      <h2>Мост портфеля</h2>
+      <p class="sub">Из чего сложилось изменение, млрд ₸. Ось не от нуля. * — аномалия источника</p>
+      <div class="chart" id="v-bridge"></div>
+    </div>
+    <div class="card wide">
+      <h2>Структура по просрочке</h2>
+      <p class="sub">Доля портфеля по корзинам дней просрочки</p>
+      <div class="chart" id="v-dpd"></div>
+    </div>
+    <div class="card wide">
+      <h2>Отрасли</h2>
+      <p class="sub">PAR30 и NPL внутри отрасли, 01.09 → 01.10</p>
+      <div class="chart" id="v-sector"></div>
+    </div>
+    <div class="card wide">
+      <h2>Программы</h2>
+      <p class="sub">PAR30 и NPL внутри программы, 01.09 → 01.10</p>
+      <div class="chart" id="v-program"></div>
+    </div>
+    <div class="card wide">
+      <h2>Концентрация: топ-10 групп связанных заёмщиков</h2>
+      <p class="sub" id="top-sub">Доля портфеля на последний срез</p>
+      <div class="chart" id="v-top"></div>
+    </div>
+  </section>
+
+  <footer>
+    Источник: <code>reporting.v_*</code> (PostgreSQL), выгрузка <code>./run.sh</code>.
+    Портфель — в тенге по курсу на дату среза, без списанных кредитов. Цифры сверены независимым пересчётом
+    (<code>scripts/verify.py</code>) и проверками <code>sql/03_checks.sql</code>.
+  </footer>
+</div>
+
+<script>
+// Русская локаль чисел для Vega: «1 234,5»
+vega.formatLocale({ decimal: ",", thousands: " ", grouping: [3], currency: ["", " ₸"] });
+
+const VL_CONFIG = {
+  background: null,
+  font: 'Inter, -apple-system, "Segoe UI", Roboto, sans-serif',
+  view: { stroke: null },
+  axis: {
+    labelColor: "#52514e", titleColor: "#52514e", labelFontSize: 11, titleFontSize: 11,
+    titleFontWeight: 500, domainColor: "#c8c7c2", tickColor: "#c8c7c2", gridColor: "#ecebe7"
+  },
+  axisY: { domain: false, ticks: false },
+  legend: { labelColor: "#52514e", titleColor: "#52514e", labelFontSize: 11.5, symbolType: "circle" },
+  header: { labelColor: "#0b0b0b" }
+};
+
+const CHARTS = [
+  ["v-dynamics", "specs/dynamics.json"],
+  ["v-bridge",   "specs/bridge.json"],
+  ["v-dpd",      "specs/dpd_structure.json"],
+  ["v-sector",   "specs/by_sector.json"],
+  ["v-program",  "specs/by_program.json"],
+  ["v-top",      "specs/top_groups.json"],
+];
+
+const fmtNum = (v, d = 1) => new Intl.NumberFormat("ru-RU", { minimumFractionDigits: d, maximumFractionDigits: d }).format(v);
+const fmtDate = s => s.split("-").reverse().join(".");
+
+function tileValue(m) {
+  if (m.unit === "kzt")   return fmtNum(m.value / 1e9) + '<span class="unit"> млрд ₸</span>';
+  if (m.unit === "ratio") return fmtNum(m.value * 100) + "%";
+  return fmtNum(m.value, 0);
+}
+function tileDelta(m) {
+  if (m.prev_value == null) return "";
+  const sign = v => (v > 0 ? "+" : v < 0 ? "−" : "±");
+  if (m.unit === "ratio") {
+    const pp = Math.abs(m.change_abs) * 100;
+    return `${sign(m.change_abs)}${fmtNum(pp, pp < 0.1 ? 2 : 1)} п.п. к ${fmtDate(m.prev_date)}`;
+  }
+  return `${sign(m.change_rel)}${fmtNum(Math.abs(m.change_rel) * 100)}% к ${fmtDate(m.prev_date)}`;
+}
+
+async function loadJSON(url) {
+  const r = await fetch(url);
+  if (!r.ok) throw new Error(url + ": " + r.status);
+  return r.json();
+}
+
+async function main() {
+  const [change, dq] = await Promise.all([loadJSON("data/metrics_change.json"), loadJSON("data/data_quality.json")]);
+  const last = change.map(d => d.report_date).sort().at(-1);
+  const prev = change.map(d => d.report_date).filter(d => d < last).sort().at(-1);
+  document.getElementById("asof").textContent = "на " + fmtDate(last);
+
+  const tiles = ["portfolio_kzt", "par30_ratio", "par90_ratio", "npl_ratio", "provisions_kzt", "top10_ratio"];
+  const byMetric = Object.fromEntries(change.filter(d => d.report_date === last).map(d => [d.metric, { ...d, prev_date: prev }]));
+  document.getElementById("kpis").innerHTML = tiles.map(k => {
+    const m = byMetric[k];
+    return `<div class="kpi"><div class="label">${m.label}</div><div class="value">${tileValue(m)}</div><div class="delta">${tileDelta(m)}</div></div>`;
+  }).join("");
+
+  const get = (name) => (dq.find(d => d.check_name === name && d.report_date === last) || {}).value || 0;
+  const reinst = get("reinstated_after_writeoff");
+  const dups = get("exact_duplicates");
+  if (reinst || dups) {
+    const el = document.getElementById("dq");
+    el.hidden = false;
+    el.innerHTML = `<b>Качество данных.</b> В выгрузке на ${fmtDate(last)} ${dups} полных дублей строк (удалены). `
+      + `${reinst} кредитов, списанных на ${fmtDate(prev)}, снова числятся в портфеле — это вопрос к источнику; `
+      + `до подтверждения снижение NPL/PAR90 стоит считать предварительным (подробнее в README).`;
+  }
+
+  const top = await loadJSON("data/top_groups.json");
+  const topShare = top.filter(d => d.report_date === last).reduce((s, d) => s + d.share, 0);
+  document.getElementById("top-sub").textContent = `Доля портфеля на ${fmtDate(last)}: топ-10 групп — ${fmtNum(topShare * 100)}%`;
+
+  for (const [id, url] of CHARTS) {
+    await vegaEmbed("#" + id, url, { actions: { export: true, source: true, compiled: false, editor: false }, config: VL_CONFIG, renderer: "svg" });
+  }
+}
+main().catch(err => {
+  document.body.insertAdjacentHTML("afterbegin",
+    `<pre style="color:#b00;padding:16px">Не удалось загрузить данные: ${err.message}\nОткройте через HTTP-сервер: python3 -m http.server 8000 -d dashboard</pre>`);
+});
+</script>
+</body>
+</html>

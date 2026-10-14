@@ -1,0 +1,141 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v6.json",
+  "description": "Риск-показатели: 01.09 → 01.10 (доли портфеля)",
+  "data": {
+    "url": "data/metrics_change.json"
+  },
+  "transform": [
+    {
+      "filter": "datum.unit === 'ratio' && datum.metric !== 'npl_coverage'"
+    },
+    {
+      "calculate": "timeFormat(toDate(datum.report_date), '%d.%m.%Y')",
+      "as": "date_label"
+    }
+  ],
+  "width": "container",
+  "height": 190,
+  "encoding": {
+    "y": {
+      "field": "label",
+      "type": "nominal",
+      "title": null,
+      "sort": [
+        "PAR30",
+        "PAR90",
+        "NPL",
+        "Топ-10 групп"
+      ]
+    }
+  },
+  "layer": [
+    {
+      "mark": {
+        "type": "rule",
+        "strokeWidth": 2,
+        "color": "#c8c7c2"
+      },
+      "encoding": {
+        "x": {
+          "aggregate": "min",
+          "field": "value",
+          "type": "quantitative"
+        },
+        "x2": {
+          "aggregate": "max",
+          "field": "value"
+        }
+      }
+    },
+    {
+      "mark": {
+        "type": "circle",
+        "size": 120,
+        "opacity": 1,
+        "stroke": "#fcfcfb",
+        "strokeWidth": 2
+      },
+      "encoding": {
+        "x": {
+          "field": "value",
+          "type": "quantitative",
+          "title": "Доля портфеля",
+          "axis": {
+            "format": ".0%"
+          },
+          "scale": {
+            "zero": true
+          }
+        },
+        "color": {
+          "field": "date_label",
+          "type": "ordinal",
+          "title": "Срез",
+          "scale": {
+            "range": [
+              "#86b6ef",
+              "#2a78d6"
+            ]
+          },
+          "legend": {
+            "orient": "top",
+            "direction": "horizontal"
+          }
+        },
+        "tooltip": [
+          {
+            "field": "label",
+            "title": "Показатель"
+          },
+          {
+            "field": "date_label",
+            "title": "Срез"
+          },
+          {
+            "field": "value",
+            "title": "Значение",
+            "format": ".2%"
+          },
+          {
+            "field": "change_abs",
+            "title": "Изменение, доли",
+            "format": "+.2%"
+          }
+        ]
+      }
+    },
+    {
+      "transform": [
+        {
+          "joinaggregate": [
+            {
+              "op": "max",
+              "field": "report_date",
+              "as": "last_date"
+            }
+          ]
+        },
+        {
+          "filter": "datum.report_date === datum.last_date"
+        }
+      ],
+      "mark": {
+        "type": "text",
+        "dy": -13,
+        "fontSize": 11,
+        "color": "#52514e"
+      },
+      "encoding": {
+        "x": {
+          "field": "value",
+          "type": "quantitative"
+        },
+        "text": {
+          "field": "value",
+          "type": "quantitative",
+          "format": ".1%"
+        }
+      }
+    }
+  ]
+}

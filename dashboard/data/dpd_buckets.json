@@ -1,0 +1,13 @@
+[{"report_date":"2026-09-01","dpd_bucket":"0","is_restructured":false,"loans":1542,"portfolio_kzt":377525053933.439500,"provisions_kzt":3775250539.33439500}, 
+ {"report_date":"2026-09-01","dpd_bucket":"0","is_restructured":true,"loans":91,"portfolio_kzt":23105007448.421000,"provisions_kzt":11552503724.21050000}, 
+ {"report_date":"2026-09-01","dpd_bucket":"1–30","is_restructured":false,"loans":124,"portfolio_kzt":32666144221.689500,"provisions_kzt":326661442.21689500}, 
+ {"report_date":"2026-09-01","dpd_bucket":"1–30","is_restructured":true,"loans":2,"portfolio_kzt":4832518022.243000,"provisions_kzt":2416259011.12150000}, 
+ {"report_date":"2026-09-01","dpd_bucket":"31–90","is_restructured":false,"loans":101,"portfolio_kzt":28926670462.436000,"provisions_kzt":2892667046.24360000}, 
+ {"report_date":"2026-09-01","dpd_bucket":"91+","is_restructured":false,"loans":115,"portfolio_kzt":31097834606.344000,"provisions_kzt":15548917303.17200000}, 
+ {"report_date":"2026-10-01","dpd_bucket":"0","is_restructured":true,"loans":88,"portfolio_kzt":26506531989.950000,"provisions_kzt":13253265994.97500000}, 
+ {"report_date":"2026-10-01","dpd_bucket":"0","is_restructured":false,"loans":1629,"portfolio_kzt":389894665759.224000,"provisions_kzt":3898946657.59224000}, 
+ {"report_date":"2026-10-01","dpd_bucket":"1–30","is_restructured":false,"loans":69,"portfolio_kzt":17989212859.801000,"provisions_kzt":179892128.59801000}, 
+ {"report_date":"2026-10-01","dpd_bucket":"1–30","is_restructured":true,"loans":4,"portfolio_kzt":234982006.00,"provisions_kzt":117491003.0000}, 
+ {"report_date":"2026-10-01","dpd_bucket":"31–90","is_restructured":false,"loans":104,"portfolio_kzt":28257608711.697000,"provisions_kzt":2825760871.16970000}, 
+ {"report_date":"2026-10-01","dpd_bucket":"31–90","is_restructured":true,"loans":1,"portfolio_kzt":152521051.00,"provisions_kzt":76260525.5000}, 
+ {"report_date":"2026-10-01","dpd_bucket":"91+","is_restructured":false,"loans":97,"portfolio_kzt":21639248455.086000,"provisions_kzt":10819624227.54300000}]

@@ -1,0 +1,67 @@
+# Готовые метрики риск-сводки: одна строка на дату среза.
+# Доли посчитаны в витрине как отношение сумм. Тип avg здесь корректен только потому,
+# что на дату ровно одна строка: avg по одной строке = само значение. Агрегировать доли
+# по нескольким датам (например, «средний NPL за квартал») этой мерой нельзя.
+
+model: portfolio_metrics
+label: Риск-сводка портфеля
+source: reporting.v_metrics
+grain: [report_date]
+
+dimensions:
+  - name: report_date
+    column: report_date
+    type: date
+    label: Дата среза
+
+measures:
+  - name: portfolio_kzt
+    column: portfolio_kzt
+    type: sum
+    format: "#,##0 ₸"
+    label: Портфель, ₸
+  - name: provisions_kzt
+    column: provisions_kzt
+    type: sum
+    format: "#,##0 ₸"
+    label: Провизии, ₸
+  - name: top10_kzt
+    column: top10_kzt
+    type: sum
+    format: "#,##0 ₸"
+    label: Экспозиция топ-10 групп, ₸
+  - name: par30_ratio
+    column: par30_ratio
+    type: avg
+    format: "0.0%"
+    label: PAR30
+  - name: par90_ratio
+    column: par90_ratio
+    type: avg
+    format: "0.0%"
+    label: PAR90
+  - name: npl_ratio
+    column: npl_ratio
+    type: avg
+    format: "0.0%"
+    label: NPL
+  - name: top10_ratio
+    column: top10_ratio
+    type: avg
+    format: "0.0%"
+    label: Концентрация, топ-10 групп
+  - name: provisions_ratio
+    column: provisions_ratio
+    type: avg
+    format: "0.00%"
+    label: Провизии к портфелю
+  - name: npl_coverage
+    column: npl_coverage
+    type: avg
+    format: "0.0%"
+    label: Покрытие NPL провизиями
+  - name: loans
+    column: loans
+    type: sum
+    format: "#,##0"
+    label: Число кредитов

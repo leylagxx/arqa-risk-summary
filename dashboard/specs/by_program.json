@@ -1,0 +1,148 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v6.json",
+  "description": "PAR30 и NPL по программам: 01.09 → 01.10",
+  "data": {
+    "url": "data/by_dimension.json"
+  },
+  "transform": [
+    {
+      "filter": "datum.dimension === 'Программа'"
+    },
+    {
+      "fold": [
+        "par30_ratio",
+        "npl_ratio"
+      ],
+      "as": [
+        "metric_key",
+        "value"
+      ]
+    },
+    {
+      "calculate": "datum.metric_key === 'par30_ratio' ? 'PAR30' : 'NPL'",
+      "as": "metric"
+    },
+    {
+      "calculate": "timeFormat(toDate(datum.report_date), '%d.%m.%Y')",
+      "as": "date_label"
+    }
+  ],
+  "facet": {
+    "column": {
+      "field": "metric",
+      "type": "nominal",
+      "title": null,
+      "sort": [
+        "PAR30",
+        "NPL"
+      ],
+      "header": {
+        "labelFontSize": 13,
+        "labelFontWeight": 600
+      }
+    }
+  },
+  "spec": {
+    "width": 380,
+    "height": 150,
+    "encoding": {
+      "y": {
+        "field": "dim_value",
+        "type": "nominal",
+        "title": null,
+        "sort": "ascending"
+      }
+    },
+    "layer": [
+      {
+        "mark": {
+          "type": "rule",
+          "strokeWidth": 2,
+          "color": "#c8c7c2"
+        },
+        "encoding": {
+          "x": {
+            "aggregate": "min",
+            "field": "value",
+            "type": "quantitative"
+          },
+          "x2": {
+            "aggregate": "max",
+            "field": "value"
+          }
+        }
+      },
+      {
+        "mark": {
+          "type": "circle",
+          "size": 110,
+          "opacity": 1,
+          "stroke": "#fcfcfb",
+          "strokeWidth": 2
+        },
+        "encoding": {
+          "x": {
+            "field": "value",
+            "type": "quantitative",
+            "title": "Доля портфеля программы",
+            "axis": {
+              "format": ".0%"
+            },
+            "scale": {
+              "zero": true
+            }
+          },
+          "color": {
+            "field": "date_label",
+            "type": "ordinal",
+            "title": "Срез",
+            "scale": {
+              "range": [
+                "#86b6ef",
+                "#2a78d6"
+              ]
+            },
+            "legend": {
+              "orient": "top",
+              "direction": "horizontal"
+            }
+          },
+          "tooltip": [
+            {
+              "field": "dim_value",
+              "title": "Программа"
+            },
+            {
+              "field": "metric",
+              "title": "Показатель"
+            },
+            {
+              "field": "date_label",
+              "title": "Срез"
+            },
+            {
+              "field": "value",
+              "title": "Значение",
+              "format": ".2%"
+            },
+            {
+              "field": "share_of_portfolio",
+              "title": "Доля в портфеле",
+              "format": ".1%"
+            },
+            {
+              "field": "portfolio_kzt",
+              "title": "Портфель, ₸",
+              "format": ",.0f"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "resolve": {
+    "scale": {
+      "x": "shared"
+    }
+  }
+}

@@ -1,0 +1,11 @@
+[{"check_name":"balance_down_without_payment","report_date":"2026-10-01","value":189,"description":"Просрочка выросла на весь период между срезами, а остаток уменьшился (остаток — плановый? вопрос к источнику)"}, 
+ {"check_name":"cured_from_91plus","report_date":"2026-10-01","value":53,"description":"Просрочка 91+ на прошлую дату, 0 дней на эту, без реструктуризации (вопрос к источнику)"}, 
+ {"check_name":"exact_duplicates","report_date":"2026-09-01","value":30,"description":"Полные дубли строк (удалены в витрине)"}, 
+ {"check_name":"exact_duplicates","report_date":"2026-10-01","value":30,"description":"Полные дубли строк (удалены в витрине)"}, 
+ {"check_name":"past_maturity_current","report_date":"2026-09-01","value":355,"description":"Срок погашения прошёл, но просрочка 0 дней (в портфеле, вопрос к источнику)"}, 
+ {"check_name":"past_maturity_current","report_date":"2026-10-01","value":379,"description":"Срок погашения прошёл, но просрочка 0 дней (в портфеле, вопрос к источнику)"}, 
+ {"check_name":"raw_rows","report_date":"2026-09-01","value":2030,"description":"Строк в raw.portfolio"}, 
+ {"check_name":"raw_rows","report_date":"2026-10-01","value":2030,"description":"Строк в raw.portfolio"}, 
+ {"check_name":"reinstated_after_writeoff","report_date":"2026-10-01","value":23,"description":"Были списаны на прошлую дату, на эту — нет (вопрос к источнику)"}, 
+ {"check_name":"written_off_loans","report_date":"2026-09-01","value":25,"description":"Списанные кредиты (исключены из портфеля)"}, 
+ {"check_name":"written_off_loans","report_date":"2026-10-01","value":8,"description":"Списанные кредиты (исключены из портфеля)"}]

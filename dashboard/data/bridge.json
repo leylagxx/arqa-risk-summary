@@ -1,0 +1,8 @@
+[{"prev_date":"2026-09-01","curr_date":"2026-10-01","step":"opening","label":"Портфель на начало","sort_order":1,"amount_kzt":498153228694.573000}, 
+ {"prev_date":"2026-09-01","curr_date":"2026-10-01","step":"new","label":"Новые кредиты","sort_order":2,"amount_kzt":0}, 
+ {"prev_date":"2026-09-01","curr_date":"2026-10-01","step":"repaid_out","label":"Выбыли из выгрузки","sort_order":3,"amount_kzt":0}, 
+ {"prev_date":"2026-09-01","curr_date":"2026-10-01","step":"written_off","label":"Списаны за период","sort_order":4,"amount_kzt":-1063441105.782500}, 
+ {"prev_date":"2026-09-01","curr_date":"2026-10-01","step":"reinstated","label":"Сняты с баланса списанных (аномалия)","sort_order":5,"amount_kzt":5675019588.047000}, 
+ {"prev_date":"2026-09-01","curr_date":"2026-10-01","step":"amortization","label":"Погашения и выдачи в валюте кредита","sort_order":6,"amount_kzt":-18506977997.492000}, 
+ {"prev_date":"2026-09-01","curr_date":"2026-10-01","step":"fx","label":"Валютная переоценка","sort_order":7,"amount_kzt":416941653.412500}, 
+ {"prev_date":"2026-09-01","curr_date":"2026-10-01","step":"closing","label":"Портфель на конец","sort_order":99,"amount_kzt":484674770832.758000}]

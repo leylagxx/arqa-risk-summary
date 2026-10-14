@@ -1,0 +1,146 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v6.json",
+  "description": "Структура портфеля по просрочке, млрд ₸",
+  "data": {
+    "url": "data/dpd_buckets.json"
+  },
+  "transform": [
+    {
+      "calculate": "datum.is_restructured && datum.dpd_bucket !== '91+' ? 'Реструкт. (≤90 дн.)' : (datum.dpd_bucket === '0' ? 'Без просрочки' : datum.dpd_bucket + ' дн.')",
+      "as": "category"
+    },
+    {
+      "calculate": "indexof(['Без просрочки','1–30 дн.','31–90 дн.','91+ дн.','Реструкт. (≤90 дн.)'], datum.category)",
+      "as": "cat_order"
+    },
+    {
+      "calculate": "timeFormat(toDate(datum.report_date), '%d.%m.%Y')",
+      "as": "date_label"
+    },
+    {
+      "aggregate": [
+        {
+          "op": "sum",
+          "field": "portfolio_kzt",
+          "as": "kzt"
+        },
+        {
+          "op": "sum",
+          "field": "loans",
+          "as": "loans"
+        }
+      ],
+      "groupby": [
+        "date_label",
+        "category",
+        "cat_order"
+      ]
+    },
+    {
+      "joinaggregate": [
+        {
+          "op": "sum",
+          "field": "kzt",
+          "as": "total"
+        }
+      ],
+      "groupby": [
+        "date_label"
+      ]
+    },
+    {
+      "calculate": "datum.kzt / 1e9",
+      "as": "bn"
+    },
+    {
+      "calculate": "datum.kzt / datum.total",
+      "as": "share"
+    }
+  ],
+  "width": "container",
+  "height": 110,
+  "mark": {
+    "type": "bar",
+    "height": {
+      "band": 0.62
+    },
+    "stroke": "#fcfcfb",
+    "strokeWidth": 2
+  },
+  "encoding": {
+    "y": {
+      "field": "date_label",
+      "type": "ordinal",
+      "title": null
+    },
+    "x": {
+      "field": "share",
+      "type": "quantitative",
+      "stack": "zero",
+      "title": "Доля портфеля",
+      "axis": {
+        "format": ".0%",
+        "tickCount": 10
+      },
+      "scale": {
+        "domain": [
+          0,
+          1
+        ]
+      }
+    },
+    "order": {
+      "field": "cat_order"
+    },
+    "color": {
+      "field": "category",
+      "type": "nominal",
+      "title": null,
+      "scale": {
+        "domain": [
+          "Без просрочки",
+          "1–30 дн.",
+          "31–90 дн.",
+          "91+ дн.",
+          "Реструкт. (≤90 дн.)"
+        ],
+        "range": [
+          "#c8c7c2",
+          "#eda100",
+          "#eb6834",
+          "#e34948",
+          "#6250d6"
+        ]
+      },
+      "legend": {
+        "orient": "top",
+        "direction": "horizontal",
+        "columns": 5
+      }
+    },
+    "tooltip": [
+      {
+        "field": "date_label",
+        "title": "Срез"
+      },
+      {
+        "field": "category",
+        "title": "Категория"
+      },
+      {
+        "field": "bn",
+        "title": "млрд ₸",
+        "format": ",.1f"
+      },
+      {
+        "field": "share",
+        "title": "Доля",
+        "format": ".1%"
+      },
+      {
+        "field": "loans",
+        "title": "Кредитов"
+      }
+    ]
+  }
+}
